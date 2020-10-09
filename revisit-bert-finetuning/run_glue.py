@@ -291,23 +291,22 @@ def train(args, train_dataset, model, tokenizer):
             import pdb
             print(len([x for x in model.parameters()]))
             print(len([x for x in pretrained_model.parameters()]))
-
+            l2_lambda = 1e-3
             # [torch.flatten(t)[0].detach().numpy() for t in pretrained_model.parameters()][:5]
             # [torch.flatten(t)[0].detach().numpy() for t in model.parameters()][:5]
             for finetune, pretrain in zip(model.parameters(), pretrained_model.parameters()):
                 diff = finetune - pretrain
                 diff_squared = diff**2
                 sum_diff = diff_squared.sum()
-                l2_reg += sum_diff
+                l2_reg += sum_diff * l2_lambda
 
             print(loss, l2_reg)
-            loss += l2_reg * 0.0001
+            loss += l2_reg
 
             if args.fp16:
                 with amp.scale_loss(loss, optimizer) as scaled_loss:
                     scaled_loss.backward()
             else:
-                pdb.set_trace()
                 loss.backward()
 
             tr_loss += loss.item()
@@ -322,7 +321,6 @@ def train(args, train_dataset, model, tokenizer):
                 else:
                     torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
 
-                pdb.set_trace()
                 optimizer.step()
                 scheduler.step()  # Update learning rate schedule
                 model.zero_grad()
