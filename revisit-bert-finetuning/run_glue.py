@@ -291,7 +291,7 @@ def train(args, train_dataset, model, tokenizer):
             import pdb
             print(len([x for x in model.parameters()]))
             print(len([x for x in pretrained_model.parameters()]))
-            l2_lambda = 1e-3
+            l2_lambda = 1e-2
             # [torch.flatten(t)[0].detach().numpy() for t in pretrained_model.parameters()][:5]
             # [torch.flatten(t)[0].detach().numpy() for t in model.parameters()][:5]
             for finetune, pretrain in zip(model.parameters(), pretrained_model.parameters()):
